@@ -1,0 +1,47 @@
+{
+  "name": "bit-vector.jsx",
+  "version": "0.1.0",
+  "description": "BitVector implementation for JSX/JS/AMD/CommonJS",
+  "scripts": {
+    "build": "grunt build",
+    "test": "grunt test",
+    "doc": "grunt doc"
+  },
+  "engines": {
+    "node": ">=0.8.0"
+  },
+  "keywords": [
+    "jsx",
+    "altjs",
+    "lib",
+    "js",
+    "amd",
+    "commonjs",
+    "nodejs",
+    "browser"
+  ],
+  "main": "./lib/bit-vector.jsx",
+  "homepage": "https://github.com/shibukawa/bit-vector.jsx",
+  "bugs": {
+    "url": "https://github.com/shibukawa/bit-vector.jsx/issues"
+  },
+  "directories": {
+    "doc": "./doc",
+    "lib": "./lib",
+    "test": "./test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git:/github.com/shibukawa/bit-vector.jsx.git"
+  },
+  "devDependencies": {
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt": "~0.4.1",
+    "grunt-jsx": ">=0.1.5"
+  },
+  "author": "shibukawa",
+  "license": "MIT",
+  "dependencies": {
+    "binary-io.jsx": "~0.1.1"
+  }
+}
