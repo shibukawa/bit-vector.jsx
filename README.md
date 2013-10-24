@@ -120,38 +120,46 @@ $ npm install bit-vector.jsx
 API Reference
 ------------------
 
-### ArrayBitVector implements BitVector.<number[]>
+### ArrayBitVector implements BitVector
 
 Constructor for bit vector based on int[]. This version resizes length automatically, but each only memory efficiency is 50%.
 This is JavaScript limitation because it has only 64bit floating point number and it uses only 32bit part as integer.
 
-### Uint32BitVector(size : int) implements BitVector.<Uint32Array>
+### Uint32BitVector(size : int) implements BitVector
 
 Constructor for bit vector based on Uint32bitVector. This version is fixed size, but memory efficiency is better than `ArrayBitVector`.
 
-### BitVector.<T>.size() : int
+### BitVector.size() : int
 
 It returns BitVector size. `set` extends this size.
 
-### BitVector.<T>.set(pos : int, flag : boolean = true) : void
+### BitVector.set(pos : int, flag : boolean = true) : void
 
 It sets bit. If `flag` is `false`, it inverts bit at specified position.
 
-### BitVector.<T>.get(pos : int) : boolean
+### BitVector.get(pos : int) : boolean
 
 It returns bit of specified position.
 
-### BitVector.<T>.build() : void
+### BitVector.build() : void
 
 Precalculates rank() number. It should be called before using `select()` and `rank()`.
 
-### BitVector.<T>.rank(pos : int, flag : boolean = true) : int
+### BitVector.rank(pos : int, flag : boolean = true) : int
 
 Counts number of bits before specified position. If flag is `false` it calcs count inverted bits.
 
-### BitVector.<T>.select(pos : int, flag : boolean = true) : int
+### BitVector.select(pos : int, flag : boolean = true) : int
 
 Returns x-th bit from first. If flag is `false` it returns position of specified x-th inverted bits.
+
+### BitVector.dump(output : BinaryOutput) : void
+
+Export bit-vector.
+
+### BitVector.load(input : BinaryInput) : void
+
+Import bit-vector.
 
 Development
 -------------
