@@ -1,6 +1,7 @@
 import "test-case.jsx";
 import "bit-vector.jsx";
 import "console.jsx";
+import "binary-io.jsx";
 
 class _Test extends TestCase
 {
@@ -68,16 +69,14 @@ class _Test extends TestCase
         }
     }
 
-    /*function test_load_dump_and_size () : void
+    function test_load_dump_and_size () : void
     {
-        console.log('dump1');
-        var dump1 = this.bv1.dump();
-        console.log('dump0');
-        var dump0 = this.bv0.dump();
-        console.log('load1');
-        this.bv1.load(dump1);
-        console.log('load0');
-        this.bv0.load(dump0);
+        var dump1 = new BinaryOutput();
+        var dump0 = new BinaryOutput();
+        this.bv1.dump(dump1);
+        this.bv0.dump(dump0);
+        this.bv1.load(new BinaryInput(dump1.result()));
+        this.bv0.load(new BinaryInput(dump0.result()));
 
         this.expect(this.bv1.size()).toBe(this.src_values[this.src_values.length - 1] + 1); // == 3001
         this.expect(this.bv1.size(true)).toBe(this.src_values.length); // == 6
@@ -87,10 +86,12 @@ class _Test extends TestCase
 
     function test_load_dump_and_get () : void
     {
-        var dump1 = this.bv1.dump();
-        var dump0 = this.bv0.dump();
-        this.bv1.load(dump1);
-        this.bv0.load(dump0);
+        var dump1 = new BinaryOutput();
+        var dump0 = new BinaryOutput();
+        this.bv1.dump(dump1);
+        this.bv0.dump(dump0);
+        this.bv1.load(new BinaryInput(dump1.result()));
+        this.bv0.load(new BinaryInput(dump0.result()));
 
         for (var i = 0; i < this.src_values.length; i++)
         {
@@ -102,10 +103,12 @@ class _Test extends TestCase
 
     function test_load_dump_and_rank () : void
     {
-        var dump1 = this.bv1.dump();
-        var dump0 = this.bv0.dump();
-        this.bv1.load(dump1);
-        this.bv0.load(dump0);
+        var dump1 = new BinaryOutput();
+        var dump0 = new BinaryOutput();
+        this.bv1.dump(dump1);
+        this.bv0.dump(dump0);
+        this.bv1.load(new BinaryInput(dump1.result()));
+        this.bv0.load(new BinaryInput(dump0.result()));
 
         for (var i = 0; i < this.src_values.length; i++)
         {
@@ -117,15 +120,18 @@ class _Test extends TestCase
 
     function test_load_dump_and_select () : void
     {
-        var dump1 = this.bv1.dump();
-        var dump0 = this.bv0.dump();
-        this.bv1.load(dump1);
-        this.bv0.load(dump0);
+        var dump1 = new BinaryOutput();
+        var dump0 = new BinaryOutput();
+        this.bv1.dump(dump1);
+        this.bv0.dump(dump0);
+        this.bv1.load(new BinaryInput(dump1.result()));
+        this.bv0.load(new BinaryInput(dump0.result()));
+
         for (var i = 0; i < this.src_values.length; i++)
         {
             var v = this.src_values[i];
             this.expect(this.bv1.select(i, true)).toBe(v);
             this.expect(this.bv0.select(i, false)).toBe(v);
         }
-    }*/
+    }
 }

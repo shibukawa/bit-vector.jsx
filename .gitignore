@@ -1,5 +1,5 @@
 ## ignore ##
 /node_modules/
 /doc/
-
+.*.swp
 ## allow ##

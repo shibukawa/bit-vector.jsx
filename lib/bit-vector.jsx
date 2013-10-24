@@ -12,7 +12,6 @@ class _BitVector
     static const SMALL_BLOCK_SIZE : int =  32;
     static const LARGE_BLOCK_SIZE : int = 256;
     static const BLOCK_RATE       : int =   8;
-
 }
 
 mixin BitVector.<T>
@@ -204,28 +203,8 @@ mixin BitVector.<T>
         return pos;
     }
 
-    /*function dump () : string
-    {
-        var contents = [] : string[];
-        contents.push(Binary.dump32bitNumber(this._size));
-        contents.push(Binary.dump32bitNumberList(this._v));
-        return contents.join('');
-    }
-
-    function load (data : string) : int
-    {
-        return this.load(data, 0);
-    }
-
-    function load (data : string, offset : int) : int
-    {
-        this.clear();
-        this._size = Binary.load32bitNumber(data, offset);
-        var result = Binary.load32bitNumberList(data, offset + 2);
-        this._v = result.result;
-        this.build();
-        return result.offset;
-    }*/
+    abstract function dump (output : BinaryOutput) : void;
+    abstract function load (input : BinaryInput) : void;
 }
 
 class ArrayBitVector implements BitVector.<number[]>
@@ -300,6 +279,19 @@ class ArrayBitVector implements BitVector.<number[]>
         }
     }
 
+    override function dump (output : BinaryOutput) : void
+    {
+        output.dump32bitNumber(this._size);
+        output.dump32bitNumberList(this._v);
+    }
+
+    override function load (input : BinaryInput) : void
+    {
+        this.clear();
+        this._size = input.load32bitNumber();
+        this._v = input.load32bitNumberList();
+        this.build();
+    }
 }
 
 class Uint32BitVector implements BitVector.<Uint32Array>
@@ -372,4 +364,22 @@ class Uint32BitVector implements BitVector.<Uint32Array>
         }
     }
 
+    override function dump (output : BinaryOutput) : void
+    {
+        output.dump32bitNumber(this._size);
+        var a = [] : number[];
+        for (var i = 0; i < this._v.length; i++)
+        {
+            a.push(this._v[i]);
+        }
+        output.dump32bitNumberList(a);
+    }
+
+    override function load (input : BinaryInput) : void
+    {
+        this.clear();
+        this._size = input.load32bitNumber();
+        this._v = new Uint32Array(input.load32bitNumberList());
+        this.build();
+    }
 }
