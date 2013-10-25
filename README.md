@@ -26,19 +26,19 @@ class _Main {
         // Rank: number of bits before specified position
 
         var bv = new Uint32BitVector(8);
-        bv.set(2);
-        bv.set(3);
-        bv.set(6):
+        bv.set1(2);
+        bv.set1(3);
+        bv.set1(6):
         bv.build(); // 00110010
 
-        console.log(bv.rank(0)); // -> 0
-        console.log(bv.rank(1)); // -> 0
-        console.log(bv.rank(2)); // -> 1
-        console.log(bv.rank(3)); // -> 2
-        console.log(bv.rank(4)); // -> 2
-        console.log(bv.rank(5)); // -> 2
-        console.log(bv.rank(6)); // -> 3
-        console.log(bv.rank(7)); // -> 3
+        console.log(bv.rank1(0)); // -> 0
+        console.log(bv.rank1(1)); // -> 0
+        console.log(bv.rank1(2)); // -> 1
+        console.log(bv.rank1(3)); // -> 2
+        console.log(bv.rank1(4)); // -> 2
+        console.log(bv.rank1(5)); // -> 2
+        console.log(bv.rank1(6)); // -> 3
+        console.log(bv.rank1(7)); // -> 3
 
         // Compress array that has many empty spaces by using BitVector.rank()
         var original = [0, 0, 200, 300, 0, 0, 500, 0]; < 8 x 8 = 64 byte
@@ -46,21 +46,21 @@ class _Main {
         var getNum = original[pos]; // => 500;
 
         var values = [200, 300, 500]; // => 24 byte + 4 byte(uint32).
-        var getNum2 = values[bv.rank(pos)]; // => 500; Same value!
+        var getNum2 = values[bv.rank1(pos)]; // => 500; Same value!
 
         // Select: return x-th bit from first
-        console.log(bv.select(0)); // -> 0
-        console.log(bv.select(1)); // -> 2
-        console.log(bv.select(2)); // -> 3
-        console.log(bv.select(3)); // -> 6
+        console.log(bv.select1(0)); // -> 0
+        console.log(bv.select1(1)); // -> 2
+        console.log(bv.select1(2)); // -> 3
+        console.log(bv.select1(3)); // -> 6
 
         // Find the word that specified character belongs to.
         var words = "hello world succinct bit vector";
         var bv2 = new Uint32BitVector(words.length);
-        bv.set(6);
-        bv.set(12);
-        bv.set(21);
-        bv.set(25);
+        bv.set1(6);
+        bv.set1(12);
+        bv.set1(21);
+        bv.set1(25);
         bv.build();
 
         console.log(bv.select(10)); // -> 1: 10th character belongs to second word.
