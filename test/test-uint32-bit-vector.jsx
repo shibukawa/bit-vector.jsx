@@ -18,14 +18,14 @@ class _Test extends TestCase
 
         for (var i = 0; i <= this.src_values[this.src_values.length - 1]; i++)
         {
-            this.bv0.set(i, true);
+            this.bv0.set1(i);
         }
 
         for (var i = 0; i < this.src_values.length; i++)
         {
             var v = this.src_values[i];
-            this.bv1.set(v, true);
-            this.bv0.set(v, false);
+            this.bv1.set1(v);
+            this.bv0.set0(v);
         }
         this.bv1.build();
         this.bv0.build();
@@ -34,9 +34,9 @@ class _Test extends TestCase
     function test_size () : void
     {
         this.expect(this.bv1.size()).toBe(this.src_values[this.src_values.length - 1] + 1); // == 3001
-        this.expect(this.bv1.size(true)).toBe(this.src_values.length); // == 6
+        this.expect(this.bv1.size1()).toBe(this.src_values.length); // == 6
         this.expect(this.bv0.size()).toBe(this.src_values[this.src_values.length - 1] + 1); // == 3001
-        this.expect(this.bv0.size(false)).toBe(this.src_values.length); // == 6
+        this.expect(this.bv0.size0()).toBe(this.src_values.length); // == 6
     }
 
     function test_get () : void
@@ -54,8 +54,8 @@ class _Test extends TestCase
         for (var i = 0; i < this.src_values.length; i++)
         {
             var v = this.src_values[i];
-            this.expect(this.bv1.rank(v, true)).toBe(i);
-            this.expect(this.bv0.rank(v, false)).toBe(i);
+            this.expect(this.bv1.rank1(v)).toBe(i);
+            this.expect(this.bv0.rank0(v)).toBe(i);
         }
     }
 
@@ -64,8 +64,8 @@ class _Test extends TestCase
         for (var i = 0; i < this.src_values.length; i++)
         {
             var v = this.src_values[i];
-            this.expect(this.bv1.select(i, true)).toBe(v);
-            this.expect(this.bv0.select(i, false)).toBe(v);
+            this.expect(this.bv1.select1(i)).toBe(v);
+            this.expect(this.bv0.select0(i)).toBe(v);
         }
     }
 
@@ -79,9 +79,9 @@ class _Test extends TestCase
         this.bv0.load(new BinaryInput(dump0.result()));
 
         this.expect(this.bv1.size()).toBe(this.src_values[this.src_values.length - 1] + 1); // == 3001
-        this.expect(this.bv1.size(true)).toBe(this.src_values.length); // == 6
+        this.expect(this.bv1.size1()).toBe(this.src_values.length); // == 6
         this.expect(this.bv0.size()).toBe(this.src_values[this.src_values.length - 1] + 1); // == 3001
-        this.expect(this.bv0.size(false)).toBe(this.src_values.length); // == 6
+        this.expect(this.bv0.size0()).toBe(this.src_values.length); // == 6
     }
 
     function test_load_dump_and_get () : void
@@ -113,8 +113,8 @@ class _Test extends TestCase
         for (var i = 0; i < this.src_values.length; i++)
         {
             var v = this.src_values[i];
-            this.expect(this.bv1.rank(v, true)).toBe(i);
-            this.expect(this.bv0.rank(v, false)).toBe(i);
+            this.expect(this.bv1.rank1(v)).toBe(i);
+            this.expect(this.bv0.rank0(v)).toBe(i);
         }
     }
 
@@ -130,8 +130,8 @@ class _Test extends TestCase
         for (var i = 0; i < this.src_values.length; i++)
         {
             var v = this.src_values[i];
-            this.expect(this.bv1.select(i, true)).toBe(v);
-            this.expect(this.bv0.select(i, false)).toBe(v);
+            this.expect(this.bv1.select1(i)).toBe(v);
+            this.expect(this.bv0.select0(i)).toBe(v);
         }
     }
 }

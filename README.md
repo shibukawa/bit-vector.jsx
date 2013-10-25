@@ -133,9 +133,21 @@ Constructor for bit vector based on Uint32bitVector. This version is fixed size,
 
 It returns BitVector size. `set` extends this size.
 
-### BitVector.set(pos : int, flag : boolean = true) : void
+### BitVector.size0() : int
 
-It sets bit. If `flag` is `false`, it inverts bit at specified position.
+It returns number of 0 bit in BitVector.
+
+### BitVector.size1() : int
+
+It returns number of 1 bit in BitVector.
+
+### BitVector.set0(pos : int) : void
+
+It sets bit at the specified position.
+
+### BitVector.set1(pos : int) : void
+
+It clears bit at the specified position.
 
 ### BitVector.get(pos : int) : boolean
 
@@ -145,13 +157,21 @@ It returns bit of specified position.
 
 Precalculates rank() number. It should be called before using `select()` and `rank()`.
 
-### BitVector.rank(pos : int, flag : boolean = true) : int
+### BitVector.rank0(pos : int) : int
 
-Counts number of bits before specified position. If flag is `false` it calcs count inverted bits.
+Counts number of 0 bit before specified position.
 
-### BitVector.select(pos : int, flag : boolean = true) : int
+### BitVector.rank1(pos : int) : int
 
-Returns x-th bit from first. If flag is `false` it returns position of specified x-th inverted bits.
+Counts number of 1 bit before specified position.
+
+### BitVector.select0(pos : int) : int
+
+Returns x-th 0 bit from first.
+
+### BitVector.select1(pos : int) : int
+
+Returns x-th 1 bit from first.
 
 ### BitVector.dump(output : BinaryOutput) : void
 

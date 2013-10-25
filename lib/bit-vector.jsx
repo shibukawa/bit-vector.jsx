@@ -7,34 +7,55 @@
 
 import "binary-io.jsx";
 
-class _BitVector
+class _BitVectorConst
 {
     static const SMALL_BLOCK_SIZE : int =  32;
     static const LARGE_BLOCK_SIZE : int = 256;
     static const BLOCK_RATE       : int =   8;
 }
 
-mixin BitVector.<T>
+mixin _BitVector.<T>
 {
     var _v : T;
     var _r : T;
     var _size : int;
     var _size1 : int;
 
+    /**
+     * Clears bit-vector.
+     */
     abstract function clear () : void;
+    /**
+     * Precalculates rank() number. It should be called before using select() and rank().
+     */
     abstract function build () : void;
 
+    /**
+     * It returns bit-vector length
+     */
     function size () : int
     {
         return this._size;
     }
 
-    function size (b : boolean) : int
+    /**
+     * It returns number of 0 bit in bit-vector.
+     */
+    function size0 () : int
     {
-        return b ? (this._size1) : (this._size - this._size1);
+        return this._size - this._size1;
     }
 
-    abstract function set (value : int, flag : boolean = true) : void;
+    /**
+     * It returns number of 1 bit in bit-vector.
+     */
+    function size1 () : int
+    {
+        return this._size1;
+    }
+
+    abstract function set0 (pos : int) : void;
+    abstract function set1 (pos : int) : void;
 
     function get (value : int) : boolean
     {
@@ -42,13 +63,23 @@ mixin BitVector.<T>
         {
             throw new Error("BitVector.get() : range error");
         }
-        var q : int = value / _BitVector.SMALL_BLOCK_SIZE;
-        var r : int = value % _BitVector.SMALL_BLOCK_SIZE;
+        var q : int = value / _BitVectorConst.SMALL_BLOCK_SIZE;
+        var r : int = value % _BitVectorConst.SMALL_BLOCK_SIZE;
         var m : int = 0x1 << r;
         return (this._v[q] & m) as boolean;
     }
 
-    function rank (i : int, b : boolean = true) : int
+    function rank0 (i : int) : int
+    {
+        return this._rank(i, false);
+    }
+
+    function rank1 (i : int) : int
+    {
+        return this._rank(i, true);
+    }
+
+    function _rank (i : int, b : boolean) : int
     {
         if (i > this.size())
         {
@@ -59,26 +90,36 @@ mixin BitVector.<T>
             return 0;
         }
         i--;
-        var q_large : int = Math.floor(i / _BitVector.LARGE_BLOCK_SIZE);
-        var q_small : int = Math.floor(i / _BitVector.SMALL_BLOCK_SIZE);
-        var r       : int = Math.floor(i % _BitVector.SMALL_BLOCK_SIZE);
+        var q_large : int = Math.floor(i / _BitVectorConst.LARGE_BLOCK_SIZE);
+        var q_small : int = Math.floor(i / _BitVectorConst.SMALL_BLOCK_SIZE);
+        var r       : int = Math.floor(i % _BitVectorConst.SMALL_BLOCK_SIZE);
         var rank : int = this._r[q_large];
         if (!b)
         {
-            rank = q_large * _BitVector.LARGE_BLOCK_SIZE - rank;
+            rank = q_large * _BitVectorConst.LARGE_BLOCK_SIZE - rank;
         }
-        var begin = q_large * _BitVector.BLOCK_RATE;
+        var begin = q_large * _BitVectorConst.BLOCK_RATE;
         for (var j = begin; j < q_small; j++)
         {
-            rank += this._rank32(this._v[j], _BitVector.SMALL_BLOCK_SIZE, b);
+            rank += this._rank32(this._v[j], _BitVectorConst.SMALL_BLOCK_SIZE, b);
         }
         rank += this._rank32(this._v[q_small], r + 1, b);
         return rank;
     }
 
-    function select(i : int, b : boolean = true) : int
+    function select0 (i : int) : int
     {
-        if (i >= this.size(b))
+        return this._select(i, false, this.size0());
+    }
+
+    function select1 (i : int) : int
+    {
+        return this._select(i, true, this.size1());
+    }
+
+    function _select (i : int, b : boolean, size : int) : int
+    {
+        if (i >= size)
         {
             throw new Error("BitVector.select() : range error");
         }
@@ -91,7 +132,7 @@ mixin BitVector.<T>
             var rank  = this._r[pivot];
             if (!b)
             {
-                rank = pivot * _BitVector.LARGE_BLOCK_SIZE - rank;
+                rank = pivot * _BitVectorConst.LARGE_BLOCK_SIZE - rank;
             }
             if (i < rank)
             {
@@ -110,12 +151,12 @@ mixin BitVector.<T>
         }
         else
         {
-            i -= right * _BitVector.LARGE_BLOCK_SIZE - this._r[right];
+            i -= right * _BitVectorConst.LARGE_BLOCK_SIZE - this._r[right];
         }
-        var j = right * _BitVector.BLOCK_RATE;
+        var j = right * _BitVectorConst.BLOCK_RATE;
         while (1)
         {
-            var rank = this._rank32(this._v[j], _BitVector.SMALL_BLOCK_SIZE, b);
+            var rank = this._rank32(this._v[j], _BitVectorConst.SMALL_BLOCK_SIZE, b);
             if (i < rank)
             {
                 break;
@@ -123,7 +164,7 @@ mixin BitVector.<T>
             j++;
             i -= rank;
         }
-        return j * _BitVector.SMALL_BLOCK_SIZE + this._select32(this._v[j], i, b);
+        return j * _BitVectorConst.SMALL_BLOCK_SIZE + this._select32(this._v[j], i, b);
     }
 
     function _rank32 (x : int, i : int, b : boolean) : int
@@ -132,7 +173,7 @@ mixin BitVector.<T>
         {
             x = ~x;
         }
-        x <<= (_BitVector.SMALL_BLOCK_SIZE - i);
+        x <<= (_BitVectorConst.SMALL_BLOCK_SIZE - i);
         x = ((x & 0xaaaaaaaa) >>>  1)
           +  (x & 0x55555555);
         x = ((x & 0xcccccccc) >>>  2)
@@ -207,7 +248,7 @@ mixin BitVector.<T>
     abstract function load (input : BinaryInput) : void;
 }
 
-class ArrayBitVector implements BitVector.<number[]>
+class ArrayBitVector implements _BitVector.<number[]>
 {
     /**
      * Constructor for bit vector based on int[]. This version resizes length
@@ -242,41 +283,54 @@ class ArrayBitVector implements BitVector.<number[]>
         this._size1 = 0;
         for (var i = 0; i < this._v.length; i++)
         {
-            if (i % _BitVector.BLOCK_RATE == 0)
+            if (i % _BitVectorConst.BLOCK_RATE == 0)
             {
-                this._r.push(this.size(true));
+                this._r.push(this.size1());
             }
-            this._size1 += this._rank32(this._v[i], _BitVector.SMALL_BLOCK_SIZE, true);
+            this._size1 += this._rank32(this._v[i], _BitVectorConst.SMALL_BLOCK_SIZE, true);
         }
     }
 
     /**
-     * It sets bit. If `flag` is `false`, it inverts bit at specified position.
+     * Clear bit.
      *
      * @param value The position you want to operate.
-     * @param flag If true, it set bit, when false, inverts bit.
      */
-    override function set (value : int, flag : boolean = true) : void
+    override function set0 (value : int) : void
     {
         if (value >= this.size())
         {
             this._size = value + 1;
         }
-        var q : int = value / _BitVector.SMALL_BLOCK_SIZE;
-        var r : int = value % _BitVector.SMALL_BLOCK_SIZE;
+        var q : int = value / _BitVectorConst.SMALL_BLOCK_SIZE;
+        var r : int = value % _BitVectorConst.SMALL_BLOCK_SIZE;
         while (q >= this._v.length)
         {
             this._v.push(0);
         }
         var m : int = 0x1 << r;
-        if (flag)
+        this._v[q] &= ~m;
+    }
+
+    /**
+     * Set bit.
+     *
+     * @param value The position you want to operate.
+     */
+    override function set1 (value : int) : void
+    {
+        if (value >= this.size())
         {
-            this._v[q] |=  m;
+            this._size = value + 1;
         }
-        else
+        var q : int = value / _BitVectorConst.SMALL_BLOCK_SIZE;
+        var r : int = value % _BitVectorConst.SMALL_BLOCK_SIZE;
+        while (q >= this._v.length)
         {
-            this._v[q] &= ~m;
+            this._v.push(0);
         }
+        var m : int = 0x1 << r;
+        this._v[q] |=  m;
     }
 
     override function dump (output : BinaryOutput) : void
@@ -294,7 +348,7 @@ class ArrayBitVector implements BitVector.<number[]>
     }
 }
 
-class Uint32BitVector implements BitVector.<Uint32Array>
+class Uint32BitVector implements _BitVector.<Uint32Array>
 {
     /**
      * Constructor for bit vector based on Uint32bitVector. This version
@@ -304,8 +358,8 @@ class Uint32BitVector implements BitVector.<Uint32Array>
      */
     function constructor (size : int)
     {
-        this._v = new Uint32Array(Math.ceil(size / _BitVector.SMALL_BLOCK_SIZE));
-        this._r = new Uint32Array(Math.ceil(size / _BitVector.LARGE_BLOCK_SIZE));
+        this._v = new Uint32Array(Math.ceil(size / _BitVectorConst.SMALL_BLOCK_SIZE));
+        this._r = new Uint32Array(Math.ceil(size / _BitVectorConst.LARGE_BLOCK_SIZE));
         this.clear();
     }
 
@@ -327,41 +381,54 @@ class Uint32BitVector implements BitVector.<Uint32Array>
         this._size1 = 0;
         for (var i = 0; i < this._v.length; i++)
         {
-            if (i % _BitVector.BLOCK_RATE == 0)
+            if (i % _BitVectorConst.BLOCK_RATE == 0)
             {
-                this._r[i / _BitVector.BLOCK_RATE] = this.size(true);
+                this._r[i / _BitVectorConst.BLOCK_RATE] = this.size1();
             }
-            this._size1 += this._rank32(this._v[i], _BitVector.SMALL_BLOCK_SIZE, true);
+            this._size1 += this._rank32(this._v[i], _BitVectorConst.SMALL_BLOCK_SIZE, true);
         }
     }
 
     /**
-     * It sets bit. If `flag` is `false`, it inverts bit at specified position.
+     * Sets bit.
      *
      * @param value The position you want to operate.
-     * @param flag If true, it set bit, when false, inverts bit.
      */
-    override function set (value : int, flag : boolean = true) : void
+    override function set1 (value : int) : void
     {
         if (value >= this.size())
         {
             this._size = value + 1;
         }
-        var q : int = value / _BitVector.SMALL_BLOCK_SIZE;
-        var r : int = value % _BitVector.SMALL_BLOCK_SIZE;
+        var q : int = value / _BitVectorConst.SMALL_BLOCK_SIZE;
+        var r : int = value % _BitVectorConst.SMALL_BLOCK_SIZE;
         if (q >= this._v.length)
         {
             throw new Error("BitVector.set() : range error. value should be < initial size / 32");
         }
         var m : int = 0x1 << r;
-        if (flag)
+        this._v[q] |=  m;
+    }
+
+    /**
+     * Clears bit.
+     *
+     * @param value The position you want to operate.
+     */
+    override function set0 (value : int) : void
+    {
+        if (value >= this.size())
         {
-            this._v[q] |=  m;
+            this._size = value + 1;
         }
-        else
+        var q : int = value / _BitVectorConst.SMALL_BLOCK_SIZE;
+        var r : int = value % _BitVectorConst.SMALL_BLOCK_SIZE;
+        if (q >= this._v.length)
         {
-            this._v[q] &= ~m;
+            throw new Error("BitVector.set() : range error. value should be < initial size / 32");
         }
+        var m : int = 0x1 << r;
+        this._v[q] &= ~m;
     }
 
     override function dump (output : BinaryOutput) : void
