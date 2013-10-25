@@ -83,15 +83,15 @@ mixin _BitVector.<T>
 
     function rank0 (i : int) : int
     {
-        return this._rank(i, false);
+        return this.rank(i, false);
     }
 
     function rank1 (i : int) : int
     {
-        return this._rank(i, true);
+        return this.rank(i, true);
     }
 
-    function _rank (i : int, b : boolean) : int
+    function rank (i : int, b : boolean) : int
     {
         if (i > this.size())
         {
@@ -117,6 +117,18 @@ mixin _BitVector.<T>
         }
         rank += this._rank32(this._v[q_small], r + 1, b);
         return rank;
+    }
+
+    function select(pos : int, bit : boolean) : void
+    {
+        if (bit)
+        {
+            this._select(pos, true, this.size1());
+        }
+        else
+        {
+            this._select(pos, false, this.size0());
+        }
     }
 
     function select0 (i : int) : int

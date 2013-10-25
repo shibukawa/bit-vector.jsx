@@ -1,6 +1,6 @@
 {
   "name": "bit-vector.jsx",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "BitVector implementation for JSX/JS/AMD/CommonJS",
   "scripts": {
     "build": "grunt build",
