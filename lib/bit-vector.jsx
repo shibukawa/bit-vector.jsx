@@ -54,6 +54,18 @@ mixin _BitVector.<T>
         return this._size1;
     }
 
+    function set(pos : int, bit : boolean) : void
+    {
+        if (bit)
+        {
+            this.set1(pos);
+        }
+        else
+        {
+            this.set0(pos);
+        }
+    }
+
     abstract function set0 (pos : int) : void;
     abstract function set1 (pos : int) : void;
 

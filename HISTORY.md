@@ -1,6 +1,10 @@
 Change History
 =================
 
+## 0.2.2 (2013/10/25)
+
+* Add set() method.
+
 ## 0.2.1 (2013/10/24)
 
 * Fix readme.
