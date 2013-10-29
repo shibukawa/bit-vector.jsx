@@ -1,6 +1,10 @@
 Change History
 =================
 
+## 0.3.0 (2013/10/28)
+
+* Change class structure.
+
 ## 0.2.3 (2013/10/25)
 
 * Add rank(), select() method.

@@ -80,7 +80,6 @@ var Uint32BitVector = require('bit-vector.common.js').Uint32BitVector;
 ```js
 // use bit-vector.amd.js
 define(['bit-vector.jsx'], function (bitvector) {
-
     ArrayBitVector = bitvector.ArrayBitVector;
     Uint32BitVector = bitvector.Uint32BitVector;
 });
@@ -89,7 +88,7 @@ define(['bit-vector.jsx'], function (bitvector) {
 ### Use via standard JSX function
 
 ```html
-<script src="bit-vector.js}}" type="text/javascript"></script>
+<script src="bit-vector.js" type="text/javascript"></script>
 <script type="text/javascript">
 window.onload = function () {
     var ArrayBitVector = JSX.require("src/bit-vector.js").ArrayBitVector;
@@ -101,7 +100,7 @@ window.onload = function () {
 ### Use via global variables
 
 ```html
-<script src="bit-vector.global.js}}" type="text/javascript"></script>
+<script src="bit-vector.global.js" type="text/javascript"></script>
 <script type="text/javascript">
 window.onload = function () {
     var bv = new ArrayBitVector();
@@ -120,64 +119,78 @@ $ npm install bit-vector.jsx
 API Reference
 ------------------
 
-### ArrayBitVector implements BitVector
+### abstract class BitVector
+
+This is an abstract of the following classes.
+
+### BitVector.create(size : int) : BitVector
+
+Creates new object and returns. If the environment supports `Uint32Array`, it returns `Uint32BitVector` object.
+Otherwise, it returns `Array32BitVector` object.
+
+### BitVector.load(input : BinaryInput) : BitVector
+
+Load from `BinaryInput`. If the environment supports `Uint32Array`, it returns `Uint32BitVector` object.
+Otherwise, it returns `Array32BitVector` object.
+
+### class ArrayBitVector extends BitVector
 
 Constructor for bit vector based on int[]. This version resizes length automatically, but each only memory efficiency is 50%.
 This is JavaScript limitation because it has only 64bit floating point number and it uses only 32bit part as integer.
 
-### Uint32BitVector(size : int) implements BitVector
+### class Uint32BitVector(size : int) extends BitVector
 
 Constructor for bit vector based on Uint32bitVector. This version is fixed size, but memory efficiency is better than `ArrayBitVector`.
 
-### BitVector.size() : int
+### BitVector#size() : int
 
 It returns BitVector size. `set` extends this size.
 
-### BitVector.size0() : int
+### BitVector#size0() : int
 
 It returns number of 0 bit in BitVector.
 
-### BitVector.size1() : int
+### BitVector#size1() : int
 
 It returns number of 1 bit in BitVector.
 
-### BitVector.set0(pos : int) : void
+### BitVector#set0(pos : int) : void
 
 It sets bit at the specified position.
 
-### BitVector.set1(pos : int) : void
+### BitVector#set1(pos : int) : void
 
 It clears bit at the specified position.
 
-### BitVector.get(pos : int) : boolean
+### BitVector#get(pos : int) : boolean
 
 It returns bit of specified position.
 
-### BitVector.build() : void
+### BitVector#build() : void
 
 Precalculates rank() number. It should be called before using `select()` and `rank()`.
 
-### BitVector.rank0(pos : int) : int
+### BitVector#rank0(pos : int) : int
 
 Counts number of 0 bit before specified position.
 
-### BitVector.rank1(pos : int) : int
+### BitVector#rank1(pos : int) : int
 
 Counts number of 1 bit before specified position.
 
-### BitVector.select0(pos : int) : int
+### BitVector#select0(pos : int) : int
 
 Returns x-th 0 bit from first.
 
-### BitVector.select1(pos : int) : int
+### BitVector#select1(pos : int) : int
 
 Returns x-th 1 bit from first.
 
-### BitVector.dump(output : BinaryOutput) : void
+### BitVector#dump(output : BinaryOutput) : void
 
 Export bit-vector.
 
-### BitVector.load(input : BinaryInput) : void
+### BitVector#load(input : BinaryInput) : void
 
 Import bit-vector.
 

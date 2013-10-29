@@ -6,192 +6,15 @@
  */
 
 import "binary-io.jsx";
+import "binary-support.jsx";
 
 class _BitVectorConst
 {
     static const SMALL_BLOCK_SIZE : int =  32;
     static const LARGE_BLOCK_SIZE : int = 256;
     static const BLOCK_RATE       : int =   8;
-}
 
-mixin _BitVector.<T>
-{
-    var _v : T;
-    var _r : T;
-    var _size : int;
-    var _size1 : int;
-
-    /**
-     * Clears bit-vector.
-     */
-    abstract function clear () : void;
-    /**
-     * Precalculates rank() number. It should be called before using select() and rank().
-     */
-    abstract function build () : void;
-
-    /**
-     * It returns bit-vector length
-     */
-    function size () : int
-    {
-        return this._size;
-    }
-
-    /**
-     * It returns number of 0 bit in bit-vector.
-     */
-    function size0 () : int
-    {
-        return this._size - this._size1;
-    }
-
-    /**
-     * It returns number of 1 bit in bit-vector.
-     */
-    function size1 () : int
-    {
-        return this._size1;
-    }
-
-    function set(pos : int, bit : boolean) : void
-    {
-        if (bit)
-        {
-            this.set1(pos);
-        }
-        else
-        {
-            this.set0(pos);
-        }
-    }
-
-    abstract function set0 (pos : int) : void;
-    abstract function set1 (pos : int) : void;
-
-    function get (value : int) : boolean
-    {
-        if (value >= this.size())
-        {
-            throw new Error("BitVector.get() : range error");
-        }
-        var q : int = value / _BitVectorConst.SMALL_BLOCK_SIZE;
-        var r : int = value % _BitVectorConst.SMALL_BLOCK_SIZE;
-        var m : int = 0x1 << r;
-        return (this._v[q] & m) as boolean;
-    }
-
-    function rank0 (i : int) : int
-    {
-        return this.rank(i, false);
-    }
-
-    function rank1 (i : int) : int
-    {
-        return this.rank(i, true);
-    }
-
-    function rank (i : int, b : boolean) : int
-    {
-        if (i > this.size())
-        {
-            throw new Error("BitVector.rank() : range error");
-        }
-        if (i == 0)
-        {
-            return 0;
-        }
-        i--;
-        var q_large : int = Math.floor(i / _BitVectorConst.LARGE_BLOCK_SIZE);
-        var q_small : int = Math.floor(i / _BitVectorConst.SMALL_BLOCK_SIZE);
-        var r       : int = Math.floor(i % _BitVectorConst.SMALL_BLOCK_SIZE);
-        var rank : int = this._r[q_large];
-        if (!b)
-        {
-            rank = q_large * _BitVectorConst.LARGE_BLOCK_SIZE - rank;
-        }
-        var begin = q_large * _BitVectorConst.BLOCK_RATE;
-        for (var j = begin; j < q_small; j++)
-        {
-            rank += this._rank32(this._v[j], _BitVectorConst.SMALL_BLOCK_SIZE, b);
-        }
-        rank += this._rank32(this._v[q_small], r + 1, b);
-        return rank;
-    }
-
-    function select(pos : int, bit : boolean) : void
-    {
-        if (bit)
-        {
-            this._select(pos, true, this.size1());
-        }
-        else
-        {
-            this._select(pos, false, this.size0());
-        }
-    }
-
-    function select0 (i : int) : int
-    {
-        return this._select(i, false, this.size0());
-    }
-
-    function select1 (i : int) : int
-    {
-        return this._select(i, true, this.size1());
-    }
-
-    function _select (i : int, b : boolean, size : int) : int
-    {
-        if (i >= size)
-        {
-            throw new Error("BitVector.select() : range error");
-        }
-
-        var left  = 0;
-        var right = this._r.length;
-        while (left < right)
-        {
-            var pivot = Math.floor((left + right) / 2);
-            var rank  = this._r[pivot];
-            if (!b)
-            {
-                rank = pivot * _BitVectorConst.LARGE_BLOCK_SIZE - rank;
-            }
-            if (i < rank)
-            {
-                right = pivot;
-            }
-            else
-            {
-                left = pivot + 1;
-            }
-        }
-        right--;
-
-        if (b)
-        {
-            i -= this._r[right];
-        }
-        else
-        {
-            i -= right * _BitVectorConst.LARGE_BLOCK_SIZE - this._r[right];
-        }
-        var j = right * _BitVectorConst.BLOCK_RATE;
-        while (1)
-        {
-            var rank = this._rank32(this._v[j], _BitVectorConst.SMALL_BLOCK_SIZE, b);
-            if (i < rank)
-            {
-                break;
-            }
-            j++;
-            i -= rank;
-        }
-        return j * _BitVectorConst.SMALL_BLOCK_SIZE + this._select32(this._v[j], i, b);
-    }
-
-    function _rank32 (x : int, i : int, b : boolean) : int
+    static function _rank32 (x : int, i : int, b : boolean) : int
     {
         if (!b)
         {
@@ -211,7 +34,7 @@ mixin _BitVector.<T>
         return x;
     }
 
-    function _select32(x : int, i : int, b : boolean) : int
+    static function _select32(x : int, i : int, b : boolean) : int
     {
         if (!b)
         {
@@ -267,12 +90,216 @@ mixin _BitVector.<T>
         }
         return pos;
     }
+}
 
+__export__ abstract class BitVector
+{
+    var _size : int;
+    var _size1 : int;
+    /**
+     * Clears bit-vector.
+     */
+    abstract function clear () : void;
+    /**
+     * Precalculates rank() number. It should be called before using select() and rank().
+     */
+    abstract function build () : void;
+
+    /**
+     * It returns bit-vector length
+     */
+    function size () : int
+    {
+        return this._size;
+    }
+
+    /**
+     * It returns number of 0 bit in bit-vector.
+     */
+    function size0 () : int
+    {
+        return this._size - this._size1;
+    }
+
+    /**
+     * It returns number of 1 bit in bit-vector.
+     */
+    function size1 () : int
+    {
+        return this._size1;
+    }
+
+    function set(pos : int, bit : boolean) : void
+    {
+        if (bit)
+        {
+            this.set1(pos);
+        }
+        else
+        {
+            this.set0(pos);
+        }
+    }
+
+    abstract function set0 (pos : int) : void;
+    abstract function set1 (pos : int) : void;
+    abstract function get (value : int) : boolean;
+
+    function rank0 (i : int) : int
+    {
+        return this.rank(i, false);
+    }
+
+    function rank1 (i : int) : int
+    {
+        return this.rank(i, true);
+    }
+
+    abstract function rank (i : int, b : boolean) : int;
+
+    function select(pos : int, bit : boolean) : void
+    {
+        if (bit)
+        {
+            this._select(pos, true, this.size1());
+        }
+        else
+        {
+            this._select(pos, false, this.size0());
+        }
+    }
+
+    function select0 (i : int) : int
+    {
+        return this._select(i, false, this.size0());
+    }
+
+    function select1 (i : int) : int
+    {
+        return this._select(i, true, this.size1());
+    }
+
+    abstract function _select (i : int, b : boolean, size : int) : int;
+
+    static function create(size : int) : BitVector
+    {
+        if (BinarySupport.uint8array)
+        {
+            return new Uint32BitVector(size);
+        }
+        else
+        {
+            return new ArrayBitVector();
+        }
+    }
+
+    static function load (input : BinaryInput) : BitVector
+    {
+        var result = BitVector.create(0);
+        result.load(input);
+        return result;
+    }
     abstract function dump (output : BinaryOutput) : void;
     abstract function load (input : BinaryInput) : void;
 }
 
-class ArrayBitVector implements _BitVector.<number[]>
+abstract class _BitVector.<T> extends BitVector
+{
+    var _v : T;
+    var _r : T;
+
+    override function get (value : int) : boolean
+    {
+        if (value >= this.size())
+        {
+            throw new Error("BitVector.get() : range error");
+        }
+        var q : int = value / _BitVectorConst.SMALL_BLOCK_SIZE;
+        var r : int = value % _BitVectorConst.SMALL_BLOCK_SIZE;
+        var m : int = 0x1 << r;
+        return (this._v[q] & m) as boolean;
+    }
+
+    override function rank (i : int, b : boolean) : int
+    {
+        if (i > this.size())
+        {
+            throw new Error("BitVector.rank() : range error");
+        }
+        if (i == 0)
+        {
+            return 0;
+        }
+        i--;
+        var q_large : int = Math.floor(i / _BitVectorConst.LARGE_BLOCK_SIZE);
+        var q_small : int = Math.floor(i / _BitVectorConst.SMALL_BLOCK_SIZE);
+        var r       : int = Math.floor(i % _BitVectorConst.SMALL_BLOCK_SIZE);
+        var rank : int = this._r[q_large];
+        if (!b)
+        {
+            rank = q_large * _BitVectorConst.LARGE_BLOCK_SIZE - rank;
+        }
+        var begin = q_large * _BitVectorConst.BLOCK_RATE;
+        for (var j = begin; j < q_small; j++)
+        {
+            rank += _BitVectorConst._rank32(this._v[j], _BitVectorConst.SMALL_BLOCK_SIZE, b);
+        }
+        rank += _BitVectorConst._rank32(this._v[q_small], r + 1, b);
+        return rank;
+    }
+
+    override function _select (i : int, b : boolean, size : int) : int
+    {
+        if (i >= size)
+        {
+            throw new Error("BitVector.select() : range error");
+        }
+
+        var left  = 0;
+        var right = this._r.length;
+        while (left < right)
+        {
+            var pivot = Math.floor((left + right) / 2);
+            var rank  = this._r[pivot];
+            if (!b)
+            {
+                rank = pivot * _BitVectorConst.LARGE_BLOCK_SIZE - rank;
+            }
+            if (i < rank)
+            {
+                right = pivot;
+            }
+            else
+            {
+                left = pivot + 1;
+            }
+        }
+        right--;
+
+        if (b)
+        {
+            i -= this._r[right];
+        }
+        else
+        {
+            i -= right * _BitVectorConst.LARGE_BLOCK_SIZE - this._r[right];
+        }
+        var j = right * _BitVectorConst.BLOCK_RATE;
+        while (1)
+        {
+            var rank = _BitVectorConst._rank32(this._v[j], _BitVectorConst.SMALL_BLOCK_SIZE, b);
+            if (i < rank)
+            {
+                break;
+            }
+            j++;
+            i -= rank;
+        }
+        return j * _BitVectorConst.SMALL_BLOCK_SIZE + _BitVectorConst._select32(this._v[j], i, b);
+    }
+}
+
+class ArrayBitVector extends _BitVector.<number[]>
 {
     /**
      * Constructor for bit vector based on int[]. This version resizes length
@@ -311,7 +338,7 @@ class ArrayBitVector implements _BitVector.<number[]>
             {
                 this._r.push(this.size1());
             }
-            this._size1 += this._rank32(this._v[i], _BitVectorConst.SMALL_BLOCK_SIZE, true);
+            this._size1 += _BitVectorConst._rank32(this._v[i], _BitVectorConst.SMALL_BLOCK_SIZE, true);
         }
     }
 
@@ -372,7 +399,7 @@ class ArrayBitVector implements _BitVector.<number[]>
     }
 }
 
-class Uint32BitVector implements _BitVector.<Uint32Array>
+class Uint32BitVector extends _BitVector.<Uint32Array>
 {
     /**
      * Constructor for bit vector based on Uint32bitVector. This version
@@ -409,7 +436,7 @@ class Uint32BitVector implements _BitVector.<Uint32Array>
             {
                 this._r[i / _BitVectorConst.BLOCK_RATE] = this.size1();
             }
-            this._size1 += this._rank32(this._v[i], _BitVectorConst.SMALL_BLOCK_SIZE, true);
+            this._size1 += _BitVectorConst._rank32(this._v[i], _BitVectorConst.SMALL_BLOCK_SIZE, true);
         }
     }
 

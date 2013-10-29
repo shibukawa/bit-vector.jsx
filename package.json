@@ -1,6 +1,6 @@
 {
   "name": "bit-vector.jsx",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "BitVector implementation for JSX/JS/AMD/CommonJS",
   "scripts": {
     "build": "grunt build",
@@ -37,11 +37,10 @@
   "devDependencies": {
     "grunt-contrib-watch": "~0.5.3",
     "grunt": "~0.4.1",
-    "grunt-jsx": ">=0.1.5"
+    "grunt-jsx": ">=0.1.5",
+    "binary-io.jsx": "~0.2.0",
+    "binary-support.jsx": "~0.1.0"
   },
   "author": "shibukawa",
-  "license": "MIT",
-  "dependencies": {
-    "binary-io.jsx": "~0.2.0"
-  }
+  "license": "MIT"
 }
