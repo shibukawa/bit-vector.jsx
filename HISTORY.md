@@ -1,6 +1,10 @@
 Change History
 =================
 
+## 0.3.1 (2013/10/29)
+
+* Fix bug. Load from serialized data and create Uint32BitVector, it was broken.
+
 ## 0.3.0 (2013/10/28)
 
 * Change class structure.

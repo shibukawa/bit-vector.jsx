@@ -498,6 +498,7 @@ class Uint32BitVector extends _BitVector.<Uint32Array>
         this.clear();
         this._size = input.load32bitNumber();
         this._v = new Uint32Array(input.load32bitNumberList());
+        this._r = new Uint32Array(Math.ceil(this._size / _BitVectorConst.LARGE_BLOCK_SIZE));
         this.build();
     }
 }
