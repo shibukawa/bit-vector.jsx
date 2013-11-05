@@ -14,12 +14,8 @@ class _BitVectorConst
     static const LARGE_BLOCK_SIZE : int = 256;
     static const BLOCK_RATE       : int =   8;
 
-    static function _rank32 (x : int, i : int, b : boolean) : int
+    static function _rank32 (x : int, i : int) : int
     {
-        if (!b)
-        {
-            x = ~x;
-        }
         x <<= (_BitVectorConst.SMALL_BLOCK_SIZE - i);
         x = ((x & 0xaaaaaaaa) >>>  1)
           +  (x & 0x55555555);
@@ -145,17 +141,24 @@ __export__ abstract class BitVector
     abstract function set1 (pos : int) : void;
     abstract function get (value : int) : boolean;
 
-    function rank0 (i : int) : int
+    function rank (i : int, flag : boolean) : int
     {
-        return this.rank(i, false);
+        if (i > this.size())
+        {
+            throw new Error("BitVector.rank() : range error");
+        }
+        if (flag)
+        {
+            return this.rank1(i);
+        }
+        else
+        {
+            return this.rank0(i);
+        }
     }
 
-    function rank1 (i : int) : int
-    {
-        return this.rank(i, true);
-    }
-
-    abstract function rank (i : int, b : boolean) : int;
+    abstract function rank0 (i : int) : int;
+    abstract function rank1 (i : int) : int;
 
     function select(pos : int, bit : boolean) : void
     {
@@ -220,12 +223,8 @@ abstract class _BitVector.<T> extends BitVector
         return (this._v[q] & m) as boolean;
     }
 
-    override function rank (i : int, b : boolean) : int
+    override function rank0 (i : int) : int
     {
-        if (i > this.size())
-        {
-            throw new Error("BitVector.rank() : range error");
-        }
         if (i == 0)
         {
             return 0;
@@ -235,16 +234,33 @@ abstract class _BitVector.<T> extends BitVector
         var q_small : int = Math.floor(i / _BitVectorConst.SMALL_BLOCK_SIZE);
         var r       : int = Math.floor(i % _BitVectorConst.SMALL_BLOCK_SIZE);
         var rank : int = this._r[q_large];
-        if (!b)
-        {
-            rank = q_large * _BitVectorConst.LARGE_BLOCK_SIZE - rank;
-        }
+        rank = q_large * _BitVectorConst.LARGE_BLOCK_SIZE - rank;
         var begin = q_large * _BitVectorConst.BLOCK_RATE;
         for (var j = begin; j < q_small; j++)
         {
-            rank += _BitVectorConst._rank32(this._v[j], _BitVectorConst.SMALL_BLOCK_SIZE, b);
+            rank += _BitVectorConst._rank32(~(this._v[j]), _BitVectorConst.SMALL_BLOCK_SIZE);
         }
-        rank += _BitVectorConst._rank32(this._v[q_small], r + 1, b);
+        rank += _BitVectorConst._rank32(~(this._v[q_small]), r + 1);
+        return rank;
+    }
+
+    override function rank1 (i : int) : int
+    {
+        if (i == 0)
+        {
+            return 0;
+        }
+        i--;
+        var q_large : int = Math.floor(i / _BitVectorConst.LARGE_BLOCK_SIZE);
+        var q_small : int = Math.floor(i / _BitVectorConst.SMALL_BLOCK_SIZE);
+        var r       : int = Math.floor(i % _BitVectorConst.SMALL_BLOCK_SIZE);
+        var rank : int = this._r[q_large];
+        var begin = q_large * _BitVectorConst.BLOCK_RATE;
+        for (var j = begin; j < q_small; j++)
+        {
+            rank += _BitVectorConst._rank32(this._v[j], _BitVectorConst.SMALL_BLOCK_SIZE);
+        }
+        rank += _BitVectorConst._rank32(this._v[q_small], r + 1);
         return rank;
     }
 
@@ -287,7 +303,8 @@ abstract class _BitVector.<T> extends BitVector
         var j = right * _BitVectorConst.BLOCK_RATE;
         while (1)
         {
-            var rank = _BitVectorConst._rank32(this._v[j], _BitVectorConst.SMALL_BLOCK_SIZE, b);
+            var value = b ? this._v[j] : ~(this._v[j]);
+            var rank = _BitVectorConst._rank32(value, _BitVectorConst.SMALL_BLOCK_SIZE);
             if (i < rank)
             {
                 break;
@@ -338,7 +355,7 @@ class ArrayBitVector extends _BitVector.<number[]>
             {
                 this._r.push(this.size1());
             }
-            this._size1 += _BitVectorConst._rank32(this._v[i], _BitVectorConst.SMALL_BLOCK_SIZE, true);
+            this._size1 += _BitVectorConst._rank32(this._v[i], _BitVectorConst.SMALL_BLOCK_SIZE);
         }
     }
 
@@ -436,7 +453,7 @@ class Uint32BitVector extends _BitVector.<Uint32Array>
             {
                 this._r[i / _BitVectorConst.BLOCK_RATE] = this.size1();
             }
-            this._size1 += _BitVectorConst._rank32(this._v[i], _BitVectorConst.SMALL_BLOCK_SIZE, true);
+            this._size1 += _BitVectorConst._rank32(this._v[i], _BitVectorConst.SMALL_BLOCK_SIZE);
         }
     }
 

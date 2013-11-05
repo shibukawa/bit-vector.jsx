@@ -1,6 +1,10 @@
 Change History
 =================
 
+## 0.3.2 (2013/10/29)
+
+* Optimize rank, rank0, rank1
+
 ## 0.3.1 (2013/10/29)
 
 * Fix bug. Load from serialized data and create Uint32BitVector, it was broken.
