@@ -1,6 +1,10 @@
 Change History
 =================
 
+## 0.4.0 (2013/11/09)
+
+* Change directory structure
+
 ## 0.3.2 (2013/10/29)
 
 * Optimize rank, rank0, rank1
